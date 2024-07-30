@@ -5,9 +5,9 @@
     {
       "name": "kpimon-go",
       "image": {
-        "registry": "nexus3.o-ran-sc.org:10004",
+        "registry": "127.0.0.1:5000",
         "name": "o-ran-sc/ric-app-kpimon-go",
-        "tag": "1.0.1"
+        "tag": "latest"
       }
     }
   ],

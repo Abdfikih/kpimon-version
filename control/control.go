@@ -36,6 +36,15 @@ type Control struct {
 	client influxdb2.Client     //client for influxdb
 }
 
+type DBdetails struct {
+    bucket string
+    org    string
+    token  string
+    url    string
+}
+
+var myDB DBdetails
+
 var (
 	timeToWait           = "w10ms"
 	subsequentActionType = "continue"
@@ -68,23 +77,56 @@ func (c Control) Consume(msg *xapp.RMRParams) error {
 }
 
 func NewControl() Control {
-	xapp.Logger.Info("In new control")
-	create_db()
-	xapp.Logger.Info("returning control")
-	return Control{
-		make(chan *xapp.RMRParams),
-		influxdb2.NewClient("http://ricplt-influxdb.ricplt:8086", "client"),
-	}
+    xapp.Logger.Info("In new control\n")
+    create_db()
+    xapp.Logger.Info("returning control\n")
+    return Control{
+        make(chan *xapp.RMRParams),
+
+        //influxdb2.NewClient("http://ricplt-influxdb.ricplt:8086", "client"),
+        influxdb2.NewClient(myDB.url, myDB.token),
+
+    }
 }
+
+
+// func NewControl() Control {
+// 	xapp.Logger.Info("In new control")
+// 	create_db()
+// 	xapp.Logger.Info("returning control")
+// 	return Control{
+// 		make(chan *xapp.RMRParams),
+// 		influxdb2.NewClient("http://ricplt-influxdb.ricplt:8086", "client"),
+// 	}
+// }
+
 func create_db() {
-	//Create a database named kpimon in influxDB
-	xapp.Logger.Info("In create_db")
-	_, err := http.Post("http://ricplt-influxdb.ricplt:8086/query?q=create%20database%20kpimon", "", nil)
-	if err != nil {
-		xapp.Logger.Error("Create database failed!")
-	}
-	xapp.Logger.Info("exiting create_db")
+    //Create a database named kpimon in influxDB
+    xapp.Logger.Info("In create_db\n")
+
+    //_, err := http.Post("http://ricplt-influxdb.ricplt:8086/query?q=create%20database%20kpimon", "", nil)
+    //if err != nil {
+    //    xapp.Logger.Error("Create database failed!")
+    //}
+
+    myDB.bucket = "kpimon" //from your influxdb UI
+    myDB.org = "influxdata"
+    myDB.token = "wy50XfpUqTxuYhhi5PWea7gbfiGz56bl" // from your influxdb UI
+    myDB.url = "http://10.104.164.151:80"
+
+
+    xapp.Logger.Info("exiting create_db\n")
 }
+
+// func create_db() {
+// 	//Create a database named kpimon in influxDB
+// 	xapp.Logger.Info("In create_db")
+// 	_, err := http.Post("http://ricplt-influxdb.ricplt:8086/query?q=create%20database%20kpimon", "", nil)
+// 	if err != nil {
+// 		xapp.Logger.Error("Create database failed!")
+// 	}
+// 	xapp.Logger.Info("exiting create_db")
+// }
 
 func (c Control) getEnbList() ([]*xapp.RNIBNbIdentity, error) {
 	enbs, err := xapp.Rnib.GetListEnbIds()
@@ -945,7 +987,7 @@ func (c *Control) handleIndication(params *xapp.RMRParams) (err error) {
 	}
 */
 func (c *Control) writeUeMetrics_db(ueMetrics *map[string]interface{}) {
-	writeAPI := c.client.WriteAPIBlocking("my-org", "kpimon")
+	writeAPI := c.client.WriteAPIBlocking("influxdata", "kpimon")
 	/*
 		ueMetricsJSON, err := json.Marshal(ueMetrics)
 		if err != nil {
@@ -966,7 +1008,7 @@ func (c *Control) writeUeMetrics_db(ueMetrics *map[string]interface{}) {
 }
 
 func (c *Control) writeCellMetrics_db(cellMetrics *map[string]interface{}) {
-	writeAPI := c.client.WriteAPIBlocking("my-org", "kpimon")
+	writeAPI := c.client.WriteAPIBlocking("influxdata", "kpimon")
 	/*
 		cellMetricsJSON, er := json.Marshal(cellMetrics)
 		if er != nil {
