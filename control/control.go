@@ -111,8 +111,8 @@ func create_db() {
 
     myDB.bucket = "kpimon" //from your influxdb UI
     myDB.org = "influxdata"
-    myDB.token = "wy50XfpUqTxuYhhi5PWea7gbfiGz56bl" // from your influxdb UI
-    myDB.url = "http://10.104.164.151:80"
+    myDB.token = "5LTgnfITa11w24CELs0wtwUPzT3VVdJX" // from your influxdb UI
+    myDB.url = "http://10.106.60.11:80"
 
 
     xapp.Logger.Info("exiting create_db\n")
@@ -584,6 +584,7 @@ func Test() (err error) {
 	}
 	defer C.e2sm_free_ric_indication_message(indicationmessage)
 	IndMsgType := int32(indicationmessage.indicationMessage_formats.present)
+	fmt.Printf("IndMsgType = %d\n", IndMsgType)
 	if IndMsgType == 1 { //parsing cell metrics
 		fmt.Printf(" parsing for cell metrics\n")
 		indMsgFormat1_C := *(**C.E2SM_KPM_IndicationMessage_Format1_t)(unsafe.Pointer(&indicationmessage.indicationMessage_formats.choice[0]))
@@ -779,8 +780,8 @@ func (c *Control) handleIndication(params *xapp.RMRParams) (err error) {
 	           return
 	   }
 	*/
-	//log.Printf("-----------RIC Indication Message-----------")
-	//log.Printf("indicationMsg.IndMessage= %x",indicationMsg.IndMessage)
+	log.Printf("-----------RIC Indication Message-----------")
+	log.Printf("indicationMsg.IndMessage= %x",indicationMsg.IndMessage)
 	cptr2 := unsafe.Pointer(&indicationMsg.IndMessage[0])
 	indicationmessage := C.e2sm_decode_ric_indication_message(cptr2, C.size_t(len(indicationMsg.IndMessage)))
 	if indicationmessage == nil {
